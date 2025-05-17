@@ -32,27 +32,27 @@ class TORGO:
         return len(self.file_paths)
 
     def __getitem__(self, idx):
-        path = self.file_paths[idx]
+        audio_path = self.file_paths[idx]
         label = self.labels[idx]
-        try:
-            audio, _ = sf.read(path)
-        except Exception as e:
-            print(f"Error reading {path}: {e}")
-            audio = None
-        return audio, label
+        return audio_path, label
 
     def load_batch(self, start_idx, batch_size):
-        batch_audio = []
+        batch_audio_paths = []
         batch_labels = []
         end_idx = min(start_idx + batch_size, len(self))
         for idx in range(start_idx, end_idx):
-            audio, label = self[idx]
-            batch_audio.append(audio)
+            audio_path, label = self[idx]
+            batch_audio_paths.append(audio_path)
             batch_labels.append(label)
-        return batch_audio, batch_labels
+        return batch_audio_paths, batch_labels
 
     def show(self, idx):
-        audio, _ = self[idx]
+        audio_path, _ = self[idx]
+        try:
+            audio, _ = sf.read(audio_path)
+        except Exception as e:
+            print(f"Error reading {audio_path}: {e}")
+            audio = None
         plt.figure(figsize=(15, 4))
         waveshow(audio, sr=self.sample_rate)
         plt.title(self.file_paths[idx].split("\\")[-1])
