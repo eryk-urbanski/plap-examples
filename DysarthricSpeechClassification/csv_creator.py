@@ -11,6 +11,10 @@ def create_csv(path) -> pd.DataFrame:
 
     print(f"Number of found groups: ", len(os.listdir(path)))
     for group in os.listdir(path):
+        if group.split('_')[-1] == 'Dys':
+            target = 1
+        else:
+            target = 0
         group_name = group.split('//')[-1]
         group_path = os.path.join(path,group)
         print(f"Number of found sessions in group{group_name}: ", len(os.listdir(group_path)))
@@ -42,7 +46,8 @@ def create_csv(path) -> pd.DataFrame:
                             'filepath': file_path,
                             'audio_data': audio_data,
                             'sample_rate': sample_rate,
-                            'length': length
+                            'length': length,
+                            'target': target
                         })
     return pd.DataFrame(data)
 
