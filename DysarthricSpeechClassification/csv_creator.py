@@ -28,19 +28,22 @@ def create_csv(path) -> pd.DataFrame:
                     try:
                         audio_data, sample_rate = sf.read(file_path)
                         length = audio_data.shape[0] / sample_rate
+                        if length == 0:
+                            raise ValueError("Length is 0")
                     except Exception as e:
                         print(f"Could not read {file_path}: {e}")
                         audio_data, sample_rate, length = None, None, None
-                    data.append({
-                        'group': group_name,
-                        'session': session_name,
-                        'mic': mic,
-                        'wav_file': wav_files,
-                        'filepath': file_path,
-                        'audio_data': audio_data,
-                        'sample_rate': sample_rate,
-                        'length': length
-                    })
+                    else:
+                        data.append({
+                            'group': group_name,
+                            'session': session_name,
+                            'mic': mic,
+                            'wav_file': wav_files,
+                            'filepath': file_path,
+                            'audio_data': audio_data,
+                            'sample_rate': sample_rate,
+                            'length': length
+                        })
     return pd.DataFrame(data)
 
 if __name__ == "__main__":
