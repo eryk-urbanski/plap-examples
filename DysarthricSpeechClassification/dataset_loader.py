@@ -57,3 +57,45 @@ class TORGO:
         waveshow(audio, sr=self.sample_rate)
         plt.title(self.file_paths[idx].split("\\")[-1])
         plt.show()
+
+import pandas as pd
+import os
+
+class ParameterizedTORGO:
+    """
+    Dataset class for loading parameterized TORGO data from a CSV file.
+    """
+
+    def __init__(self, csv_path):
+        self.df = pd.read_csv(csv_path)
+        print(f"Loaded TORGO_CSV dataset with {len(self.df)} entries from {csv_path}.")
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+        # path,prompt,prompt_category,length_samples,length_seconds,label,ASC...
+        path = row['path']
+        label = row['label']
+        features = row.iloc[7:]
+        return path, label, features
+
+    def subset(self, categories=None, microphones=None):
+        subset_df = self.df.copy()
+
+        if categories:
+            subset_df = subset_df[subset_df['prompt_category'].isin(categories)]
+
+        if microphones:
+            mic_mask = pd.Series(False, index=subset_df.index)
+            for mic in microphones:
+                if mic.lower() == 'array':
+                    mic_mask |= subset_df['path'].str.contains('array', case=False, na=False)
+                elif mic.lower() == 'head':
+                    mic_mask |= subset_df['path'].str.contains('head', case=False, na=False)
+            subset_df = subset_df[mic_mask]
+
+        subset_obj = ParameterizedTORGO.__new__(ParameterizedTORGO)  # Bypass __init__
+        subset_obj.df = subset_df.reset_index(drop=True)
+        return subset_obj
